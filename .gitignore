@@ -1,0 +1,16 @@
+# Gleam build output that isn't needed to run the app.
+#
+# Keep build/dev/javascript/ itself: index.html loads the compiled app from
+# ./build/dev/javascript/animator/app.mjs, so the deployed site needs it.
+build/packages/
+build/lsp/
+build/*.lock
+_gleam_artefacts/
+
+# Editor and OS clutter
+.DS_Store
+*.swp
+erl_crash.dump
+
+# Downloaded course bundles
+*.zip
