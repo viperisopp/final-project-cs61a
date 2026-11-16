@@ -7,6 +7,9 @@ build/lsp/
 build/*.lock
 _gleam_artefacts/
 
+# gitignore the animator problems to align with cs61a course policy
+src/
+
 # Editor and OS clutter
 .DS_Store
 *.swp
