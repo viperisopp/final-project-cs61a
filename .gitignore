@@ -1,10 +1,6 @@
-# Gleam build output that isn't needed to run the app.
-#
-# Keep build/dev/javascript/ itself: index.html loads the compiled app from
-# ./build/dev/javascript/animator/app.mjs, so the deployed site needs it.
-build/packages/
-build/lsp/
-build/*.lock
+# Gleam build output. The deployed site is public/ (from `gleam dev publish`),
+# so none of build/ needs to be committed. It also holds copies of src/.
+build/
 _gleam_artefacts/
 
 # gitignore the animator problems to align with cs61a course policy
