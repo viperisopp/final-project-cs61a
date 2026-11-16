@@ -2,7 +2,7 @@
 
 A CS 61A project: a web app for program-generated drawings. You write a `draw`
 function in a small Gleam-like language, and the app animates the paths it
-returns. It's written in [Gleam](https://gleam.run) with [Lustre](https://lustre.build).
+returns. It's written in [Gleam](https://gleam.run) and deployed at https://viperisopp.github.io/final-project-cs61a/
 
 ## Features
 
