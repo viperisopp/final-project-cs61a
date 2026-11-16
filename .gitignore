@@ -17,3 +17,14 @@ erl_crash.dump
 
 # Downloaded course bundles
 *.zip
+
+# Course tooling and grading files (kept locally, not needed for the site)
+.provenance/
+.provenance-manifest
+.server_logs/
+grading/
+grader.json
+AGENTS.md
+
+# Editor settings
+.vscode/
