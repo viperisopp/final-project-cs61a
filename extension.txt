@@ -1,0 +1,76 @@
+Extension: "Climb" -- a game mode with levels
+
+Overview
+Animator gains a game mode, turned on with its own toggle and with its own menu of
+three levels (designed later). In each level, the player writes code whose lines must
+climb from the bottom of the canvas to the top while dodging "evil" drawings: red
+paths, built into the level, that branch out from the top of the canvas toward the
+bottom. Turning the toggle off returns to the normal animator, which works exactly
+as before. Each level's code is saved in localStorage the same way drawings are, so
+it survives a reload.
+
+The anchor
+Each level starts the player at a point near the bottom of the canvas called the
+anchor. In game mode, code can read a built-in value `anchor`, a Point (like
+shape_slider is an Int). The player's lines must start at the anchor, for example
+Path(Line(anchor, Point(anchor.x, anchor.y - 300)), 0, 10, 3). The draw function's
+signature does not change.
+
+Moving the anchor (in code)
+Alongside draw, the player can write a second function,
+fn move_anchor(anchor: Point) -> Point, that says where the anchor goes next. The
+anchor moves to that point the moment one of the player's visible lines reaches it;
+if no visible line ever reaches it, the anchor stays put. A built-in,
+find_anchor(start, end, thickness), returns a Path drawn straight from the anchor to
+the point move_anchor names, so a player can write [find_anchor(0, 10, 4)] to climb
+from anchor to anchor. A move is permanent: after
+it, draw and move_anchor are run again with the new anchor, so new lines grow from
+the new anchor (starting from the beginning of the player's timeline), and climbing
+higher means chaining moves.
+
+Two timelines
+The red drawings and the player's drawing run on separate clocks. The red clock runs
+on its own from the moment the level starts. The playback controls (Reset, Play,
+Pause, and the speed slider, including negative speeds) control only the player's
+clock. When the anchor moves, the player's old lines stay on screen -- and can still
+be caught -- until the player presses Reset or sets a negative speed, which clears
+them. So a strategy is to grow a line upward, let the anchor move to its tip, then
+quickly reset so the red drawings have nothing to hit, while keeping the higher
+anchor. A separate "Restart level" button resets both clocks and puts the anchor back
+at the level's starting point.
+
+Red drawings
+Levels can differ in how their red paths behave over time: in some, red paths grow
+down from the top at normal speed and stay on screen once drawn, so the level gets
+harder the longer the player takes; in others, the red paths grow down, clear, and
+start again from the top in a loop.
+
+Winning and losing
+The player wins when one of their visible lines reaches the green goal bar that fills
+the top of the canvas. The player is caught when any visible part of one of their
+lines (old or new) touches any visible part of a red path at the same moment, and
+also loses if one of their lines touches the left or right edge of the canvas; line
+thickness counts. Whichever happens first ends the attempt: the clocks stop and a
+banner says "Level complete!", "Caught!", or "Hit the edge!". Restart level tries
+again.
+
+Display
+Player lines use the normal color, red paths are red, the goal is a solid green bar
+along the top, and the anchor is shown on the canvas as a small marker so the player
+can see where their next lines start.
+
+Tutorial
+The first time game mode is turned on, a "How to play" guide opens: seven short steps
+(the goal, the anchor, move_anchor, the two clocks, the reset trick, timing, and
+levels), some with read-only example code. Both clocks pause while it is open, and a
+"How to play" button reopens it. Its last step leads to a Tutorial level, first in the
+level menu, with one slow red line out of the way and commented starter code that
+wins as written and suggests experiments to try.
+
+Implementation notes
+The levels (starting anchor, red paths, and whether they loop) are Gleam data in a new
+module. The app binds `anchor` as an extra built-in in the global frame and calls
+move_anchor with the existing evaluator.run, just as drawing.gleam calls draw, so
+the interpreter itself is unchanged. The canvas code is extended to keep two clocks
+and draw two layers, and the app checks for anchor moves, wins, and hits as the
+clocks advance.

@@ -1,0 +1,537 @@
+/* All styling for the Animator app. Its code only attaches class names. */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+
+/* ── Layout: two columns ─────────────────────────────────────────────────── */
+
+.app {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background: #1a1a2e;
+  color: #d4c5a0;
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+}
+
+/* Left column: the code editor. */
+.code-col {
+  width: 42%;
+  min-width: 320px;
+  max-width: 720px;
+  flex-shrink: 0;
+  display: flex;
+  border-right: 1px solid #3a3a5e;
+  background: #0f0f1e;
+}
+
+/* The code column stays in the DOM when collapsed, so CodeMirror keeps its
+   state; hiding it gives the right column the full width. */
+.app.code-hidden .code-col { display: none; }
+
+/* A small emoji button (the code pane's collapse toggle, and the playback
+   controls once they exist). */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #2a2a4a;
+  color: #d4c5a0;
+  border: 1px solid #4a4a8a;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 5px 8px;
+}
+.icon-btn:hover { background: #3a3a5e; }
+
+/* ── Code panel (left column) ───────────────────────────────────────────── */
+
+.code-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #1a1a3e;
+  border-bottom: 1px solid #3a3a5e;
+}
+.code-title {
+  color: #e8d8b0;
+  font-family: 'Georgia', serif;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+/* The drawing menu, between the header and the code: a strip the size of
+   the header, with the <select> filling it. */
+.library {
+  display: flex;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #1a1a3e;
+  border-bottom: 1px solid #3a3a5e;
+}
+.library-select {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  padding: 0 8px;
+  background: #0d0d1a;
+  color: #e8d8b0;
+  border: 1px solid #4a4a8a;
+  border-radius: 4px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 13px;
+  cursor: pointer;
+}
+.library-select:hover { border-color: #6a6aaa; }
+/* Buttons in the strip (Restart) and on the banner. */
+.library-btn {
+  flex-shrink: 0;
+  height: 30px;
+  padding: 0 12px;
+  background: #2a2a4a;
+  color: #d4c5a0;
+  border: 1px solid #4a4a8a;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.library-btn:hover { background: #3a3a5e; color: #e8d8b0; }
+/* The game-mode toggle: a gold button in the top-right corner of the
+   animation pane, filled in while game mode is on. */
+.game-toggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 15;
+  padding: 8px 14px;
+  background: rgba(42, 32, 10, 0.9);
+  color: #ffcb6b;
+  border: 2px solid #ffcb6b;
+  border-radius: 8px;
+  font-family: 'Georgia', serif;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(255, 203, 107, 0.25);
+}
+.game-toggle:hover {
+  background: rgba(74, 58, 26, 0.95);
+  box-shadow: 0 0 16px rgba(255, 203, 107, 0.45);
+}
+.game-toggle[aria-pressed="true"] {
+  background: #ffcb6b;
+  color: #1a1a2e;
+}
+.library-select:focus { outline: 1px solid #6a6aaa; }
+
+/* Wrapper holding the editor. */
+.code-editor-wrap {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+}
+/* CodeMirror mount node: grows to fill the panel. */
+.code-editor {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+  background: #0d0d1a;
+}
+.code-editor .cm-editor { width: 100%; height: 100%; }
+
+/* Collapsible reference of the built-ins available to draw functions. */
+.reference {
+  margin: 8px 14px 14px;
+  border: 1px solid #3a3a5e;
+  border-radius: 4px;
+  background: #0d0d1a;
+  overflow: hidden;
+}
+.reference-summary {
+  padding: 6px 12px;
+  cursor: pointer;
+  color: #b8a888;
+  font-family: monospace;
+  font-size: 12px;
+  user-select: none;
+}
+.reference-summary:hover { color: #e8d8b0; }
+.reference-body {
+  max-height: 35vh;
+  overflow-y: auto;
+  padding: 4px 12px 10px;
+  border-top: 1px solid #3a3a5e;
+}
+.reference-group { margin-top: 8px; }
+.reference-group-title {
+  color: #8a8aca;
+  font-family: monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.reference-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 1px 0;
+}
+.reference-sig {
+  color: #89ddff;
+  font-family: monospace;
+  font-size: 12px;
+  white-space: pre;
+}
+.reference-desc { color: #6a7a8a; font-size: 11px; }
+
+/* ── Animation area (right column) ──────────────────────────────────────── */
+
+.canvas-area {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0a14;
+  container-type: size;
+}
+
+/* The error message from the latest run (empty when the code works),
+   overlaid across the top of the animation pane. */
+.output {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  max-height: 40%;
+  margin: 0;
+  padding: 16px;
+  overflow: auto;
+  background: rgba(10, 10, 20, 0.85);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #ff9a8a;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+/* Nothing to report: take no space over the drawing. */
+.output:empty { display: none; }
+/* Leave room for the reveal button, which only overlays this pane while the
+   code column is hidden. */
+.app.code-hidden .output { padding-top: 48px; }
+
+/* Button that reveals the code column again when it is hidden. */
+.reveal-code {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+}
+
+/* A centred square that fits the (possibly non-square) animation area. Give your
+   <canvas> this class, so that drawings aren't stretched. */
+.canvas {
+  width: min(100cqw, 100cqh);
+  height: min(100cqw, 100cqh);
+}
+
+
+/* ── Playback controls (box in the bottom-right of the animation pane) ─── */
+
+.controls {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 10;
+  width: 250px;
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 12px 10px;
+  background: rgba(26, 26, 46, 0.85);
+  border: 1px solid #3a3a5e;
+  border-radius: 6px;
+}
+/* Collapsed: only the toggle remains, in a small box. */
+.controls.collapsed {
+  width: auto;
+  height: auto;
+  padding: 4px;
+}
+.controls.collapsed .cursor-readout { display: none; }
+
+/* Top row: the cursor's coordinates on the left, the toggle on the right. */
+.controls-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.cursor-readout {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+}
+.cursor-axis { color: #b8a888; }
+.cursor-value {
+  min-width: 4ch;
+  margin-right: 6px;
+  color: #e8d8b0;
+  font-variant-numeric: tabular-nums;
+}
+.controls.collapsed .control { display: none; }
+
+/* The collapse toggle, at the right of the box's top row, boxed like the
+   playback buttons. */
+.controls-toggle {
+  flex-shrink: 0;
+  width: 22px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #2a2a4a;
+  color: #d4c5a0;
+  border: 1px solid #4a4a8a;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+}
+.controls-toggle:hover { background: #3a3a5e; color: #e8d8b0; }
+
+/* One row: buttons or label, the slider, then its value. The fixed side
+   columns keep both sliders lined up. */
+.control {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 84px 1fr 38px;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+.control-label {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  color: #b8a888;
+}
+.control input[type="range"] {
+  width: 100%;
+  min-width: 0;
+  accent-color: #8a8aca;
+}
+.control-value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: #e8d8b0;
+}
+
+/* Reset / play / pause, filling the label column of the speed row. */
+.playback-buttons {
+  display: flex;
+  gap: 4px;
+}
+.playback-btn {
+  flex: 1;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #2a2a4a;
+  color: #d4c5a0;
+  border: 1px solid #4a4a8a;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+}
+.playback-btn:hover { background: #3a3a5e; color: #e8d8b0; }
+/* The ⟲ glyph draws small at the shared size; enlarge it to match ▶ and ❚❚. */
+.playback-btn.reset-btn { font-size: 16px; }
+
+/* ── Game mode: the end-of-level banner, centred over the canvas ────────── */
+
+.banner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 32px;
+  background: rgba(15, 15, 30, 0.92);
+  border: 1px solid #3a3a5e;
+  border-radius: 8px;
+}
+.banner-title {
+  font-family: 'Georgia', serif;
+  font-size: 26px;
+  letter-spacing: 1px;
+}
+.banner.won { border-color: #4caf7a; }
+.banner.won .banner-title { color: #7ad6a0; }
+.banner.lost { border-color: #ff4d4d; }
+.banner.lost .banner-title { color: #ff8a8a; }
+
+/* ── Game mode: the "How to play" guide, a panel over the whole app ─────── */
+
+.guide-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(5, 5, 12, 0.6);
+}
+.guide {
+  width: min(480px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 22px 16px;
+  background: #13132a;
+  border: 1px solid #ffcb6b;
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  color: #d4c5a0;
+}
+.guide-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.guide-kicker {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #ffcb6b;
+}
+.guide-close {
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: #b8a888;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.guide-close:hover { background: #2a2a4a; color: #e8d8b0; }
+.guide-title {
+  font-family: 'Georgia', serif;
+  font-size: 22px;
+  font-weight: normal;
+  color: #e8d8b0;
+}
+.guide-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+.guide-code {
+  padding: 1px 5px;
+  background: #0d0d1a;
+  border-radius: 3px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12.5px;
+  color: #ffcb6b;
+}
+.guide-snippet {
+  padding: 10px 12px;
+  overflow-x: auto;
+  background: #0d0d1a;
+  border: 1px solid #2a2a4a;
+  border-radius: 6px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #cfe3ff;
+  white-space: pre;
+}
+.guide-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 4px;
+}
+.guide-progress { font-size: 12px; color: #8a8aaa; }
+.guide-actions { display: flex; gap: 8px; }
+.guide-actions .library-btn:disabled { opacity: 0.4; cursor: default; }
+.guide-primary {
+  background: #ffcb6b;
+  border-color: #ffcb6b;
+  color: #1a1a2e;
+}
+.guide-primary:hover { background: #ffd98f; color: #1a1a2e; }
+
+/* ── Scrollbars: always visible in the code editor and the Built-ins panel ─ */
+
+/* Chrome and Safari: custom scrollbars are drawn permanently, rather than as
+   macOS overlay bars that hide until you scroll. */
+.code-editor .cm-scroller::-webkit-scrollbar,
+.reference-body::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+.code-editor .cm-scroller::-webkit-scrollbar-track,
+.reference-body::-webkit-scrollbar-track {
+  background: #16162c;
+}
+.code-editor .cm-scroller::-webkit-scrollbar-thumb,
+.reference-body::-webkit-scrollbar-thumb {
+  background: #6a6aaa;
+  border: 3px solid #16162c;
+  border-radius: 6px;
+}
+.code-editor .cm-scroller::-webkit-scrollbar-thumb:hover,
+.reference-body::-webkit-scrollbar-thumb:hover {
+  background: #8a8aca;
+}
+.code-editor .cm-scroller::-webkit-scrollbar-corner,
+.reference-body::-webkit-scrollbar-corner {
+  background: #16162c;
+}
+
+/* Other browsers (e.g. Firefox). Only where ::-webkit-scrollbar isn't
+   supported, because in Chrome these would switch the styles above off. */
+@supports not selector(::-webkit-scrollbar) {
+  .code-editor .cm-scroller,
+  .reference-body {
+    scrollbar-color: #6a6aaa #16162c;
+    scrollbar-width: auto;
+  }
+}
