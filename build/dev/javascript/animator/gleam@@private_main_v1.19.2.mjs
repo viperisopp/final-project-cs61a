@@ -1,2 +1,2 @@
-import { main } from "./animator_test.mjs";
+import { main } from "./animator_dev.mjs";
 main();
